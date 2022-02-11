@@ -10,6 +10,9 @@ in the Arabic language.
 ##The Tools i used to build the bot
 
 python
+
 aws lambda
+
 aws eventbridge
+
 aws s3 as a database with s3 select for cost optimizing
