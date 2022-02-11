@@ -15,4 +15,4 @@ aws lambda
 
 aws eventbridge
 
-aws s3 as a database with s3 select for cost optimizing
+aws s3 as a database with s3 select for cost optimizing and to minimize the data processing time
