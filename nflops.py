@@ -73,62 +73,76 @@ def oneteam(team,teamName):
     t3="و انتصر في"
     t4="وخسر"
     t5="منذ تأسيس الدوري"
+    t6="وتعادل"
     win=0
     total=0
+    all=0
     lose=0
-    wins = client.select_object_content(
-        Bucket="nflstats",
-        Key="1970to2021.csv",
-        ExpressionType='SQL',
-        Expression="SELECT count(*) FROM s3object s where (s.Team1='"+team+"' AND s.Score1 > s.Score2) OR (s.Team2='"+team+"' AND s.Score1 < s.Score2)",
-        InputSerialization = {'CSV': {"FileHeaderInfo": "Use"}},
-        OutputSerialization = {'CSV': {}},
-        )
+    draw=0
     totals = client.select_object_content(
         Bucket="nflstats",
         Key="1970to2021.csv",
         ExpressionType='SQL',
-        Expression="SELECT count(*) FROM s3object s where s.Team1='"+team+"' OR s.Team2='"+team+"'",
+        Expression="SELECT * FROM s3object s where s.Team1='"+team+"' OR s.Team2='"+team+"' " ,
         InputSerialization = {'CSV': {"FileHeaderInfo": "Use"}},
         OutputSerialization = {'CSV': {}},
         )
-    for i in wins["Payload"]:
-        if "Records" in i:
-            win=(i["Records"]["Payload"].decode())
+
     for i in totals["Payload"]:
         if "Records" in i:
-            total=(i["Records"]["Payload"].decode())
-    lose=int((total.split())[0])-int((win.split())[0])
-    return t1+" "+teamName+" "+str((total.split())[0])+" "+t2+" "+t3+" "+str((win.split())[0])+" "+t4+" "+str(lose)+" "+t5
+            all=(i["Records"]["Payload"].decode())
+    
+    all=list(all.split("\r\n"))
+    for i in all:
+        all[(all.index(i))]=i.split(",")
+    del all[-1]
+    for match in all:
+        total=total+1
+
+        if(match[5]==match[6]):
+            draw=draw+1
+        elif((match[3]==team and match[5]>match[6])or(match[4]==team and match[6]>match[5])):
+            win=win+1
+        else:
+            lose=lose+1
+    
+    return t1+" "+teamName+" "+str(total)+" "+t2+"  "+t3+" "+str(win)+" "+t4+" "+str(lose)+" "+t6+" "+str(draw)+" "+t5
 
 
 def teamVsteam(team1,team1Name,team2,team2Name):
-    txt=["مباراة لعبت بين","و انتصر","مباراة منذ تأسيس الدوري"]
+    txt=[" مباريات لعبت بين"," و انتصر"," منذ تأسيس الدوري","وخسر",'وتعادل']
     win=0
     total=0
-    wins = client.select_object_content(
-        Bucket="nflstats",
-        Key="1970to2021.csv",
-        ExpressionType='SQL',
-        Expression="SELECT count(*) FROM s3object s where ((s.Team1='"+team1+"' AND s.Team2='"+team2+"') AND s.Score1 > s.Score2) OR ((s.Team2='"+team1+"' AND s.Team1='"+team2+"') AND s.Score1 < s.Score2)",
-        InputSerialization = {'CSV': {"FileHeaderInfo": "Use"}},
-        OutputSerialization = {'CSV': {}},
-        )
+    all=0
+    lose=0
+    draw=0
     totals = client.select_object_content(
         Bucket="nflstats",
         Key="1970to2021.csv",
         ExpressionType='SQL',
-        Expression="SELECT count(*) FROM s3object s where  (s.Team1='"+team1+"' AND s.Team2='"+team2+"') OR (s.Team2='"+team1+"' AND s.Team1='"+team2+"') ",
+        Expression="SELECT * FROM s3object s where s.Team1='"+team1+"' and s.Team2='"+team2+"'  OR s.Team1='"+team2+"' and s.Team2='"+team1+"' " ,
         InputSerialization = {'CSV': {"FileHeaderInfo": "Use"}},
         OutputSerialization = {'CSV': {}},
         )
-    for i in wins["Payload"]:
-        if "Records" in i:
-            win=(i["Records"]["Payload"].decode())
     for i in totals["Payload"]:
         if "Records" in i:
-            total=(i["Records"]["Payload"].decode())
-    return (str((total.split())[0])+" "+str(txt[0])+" "+team1Name+" و"+team2Name+" "+str(txt[1])+" "+team1Name+" في "+str((win.split())[0])+" "+str(txt[2]))
+            all=(i["Records"]["Payload"].decode())
+    
+    all=list(all.split("\r\n"))
+    for i in all:
+        all[(all.index(i))]=i.split(",")
+    del all[-1]
+    for match in all:
+        total=total+1
+
+        if(match[5]==match[6]):
+            draw=draw+1
+        elif((match[3]==team1 and match[5]>match[6])or(match[4]==team1 and match[6]>match[5])):
+            win=win+1
+        else:
+            lose=lose+1
+    return str(total)+" "+str(txt[0])+" "+team1Name+" و "+team2Name+" "+str(txt[1])+" "+team1Name+" في "+str(win)+""+str(txt[3])+" "+str(lose)+" "+str(txt[4])+" "+str(draw)+" "+str(txt[2])
+
 
 def idDupChecker(ids,id):
     for i in ids:
