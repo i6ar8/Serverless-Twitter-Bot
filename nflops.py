@@ -144,6 +144,8 @@ def teamVsteam(team1,team1Name,team2,team2Name):
     return str(total)+" "+str(txt[0])+" "+team1Name+" و "+team2Name+" "+str(txt[1])+" "+team1Name+" في "+str(win)+""+str(txt[3])+" "+str(lose)+" "+str(txt[4])+" "+str(draw)+" "+str(txt[2])
 
 
+
+
 def idDupChecker(ids,id):
     for i in ids:
         if(i==str(id)):
